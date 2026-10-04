@@ -21,3 +21,10 @@ output = ["text"]
 [[weights]]
 label = "Hugging Face"
 url = "https://huggingface.co/openai/gpt-oss-120b"
+
+[[benchmarks]]
+name = "Aider Polyglot"
+score = 41.8
+metric = "percent correct"
+source = "https://aider.chat/docs/leaderboards/"
+date = "2025-08-06"

@@ -23,3 +23,10 @@ output = ["text"]
 [[weights]]
 label = "Hugging Face"
 url = "https://huggingface.co/google/gemma-3-27b-it"
+
+[[benchmarks]]
+name = "Aider Polyglot"
+score = 4.9
+metric = "percent correct"
+source = "https://aider.chat/docs/leaderboards/"
+date = "2025-03-15"

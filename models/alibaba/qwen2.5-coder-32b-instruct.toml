@@ -20,3 +20,10 @@ output = ["text"]
 [[weights]]
 label = "Hugging Face"
 url = "https://huggingface.co/Qwen/Qwen2.5-Coder-32B-Instruct"
+
+[[benchmarks]]
+name = "Aider Polyglot"
+score = 16.4
+metric = "percent correct"
+source = "https://aider.chat/docs/leaderboards/"
+date = "2024-12-26"
