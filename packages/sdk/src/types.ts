@@ -176,6 +176,16 @@ export interface ModelMetadata {
   benchmarks?: BenchmarkResult[]
 }
 
+/** Data retention and training policy published by a provider. */
+export interface DataPolicy {
+  /** Days prompts and completions are retained by default; 0 means not retained. Absent when unpublished. */
+  retention_days?: number
+  /** Whether API data is used for model training by default. Absent when unpublished. */
+  trains_on_data?: boolean
+  /** URL of the provider's policy this is taken from. */
+  source: string
+}
+
 /** Per-mode overrides for experimental model modes. */
 export interface ExperimentalMode {
   cost?: Cost
@@ -241,6 +251,8 @@ export interface Model {
   modalities: Modalities
   open_weights: boolean
   limit: Limit
+  /** Overrides the provider's `data_policy` for this model; resolve with `model.data_policy ?? provider.data_policy`. */
+  data_policy?: DataPolicy
   /** Lifecycle status; absent means generally available. */
   status?: "alpha" | "beta" | "deprecated"
   experimental?: ModelExperimental
@@ -266,6 +278,8 @@ export interface Provider {
   name: string
   /** URL of the provider's model documentation. */
   doc: string
+  /** Default data retention and training policy; absent when not recorded. */
+  data_policy?: DataPolicy
   /** Models offered by this provider, keyed by provider-scoped model ID. */
   models: Record<string, Model>
 }

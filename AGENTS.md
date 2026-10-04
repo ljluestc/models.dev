@@ -90,6 +90,19 @@ api = "https://api.example.com/v1" # required for openai-compatible
 doc = "https://example.com/docs"
 ```
 
+### Data policy (optional)
+
+Record the provider's **own** published defaults for its API — not what an aggregator negotiated (OpenRouter's provider table describes routing through OpenRouter, not direct use).
+
+```toml
+[data_policy]
+retention_days = 30        # 0 = not retained; omit if unpublished
+trains_on_data = false     # omit if unpublished
+source = "https://example.com/privacy"  # required
+```
+
+Quote the deciding sentence in a comment above `[data_policy]`. Set `data_policy` on a provider model only when that model's policy differs from the provider default.
+
 ### Logo (blocker for new providers)
 
 - Path: `providers/<provider-id>/logo.svg`
@@ -150,6 +163,7 @@ With `base_model`, do not restate fields already correct on the lab entry. Still
 | --- | --- |
 | `cost`, `reasoning_options` | Host pricing and API controls |
 | `interleaved` | Reasoning side channel on **this** API (`reasoning_content` / `reasoning_details`, or `true`) |
+| `data_policy` | Per-model override of the provider's data policy (see below) |
 | `status` | Lifecycle on **this** host: `alpha` / `beta` / `deprecated` |
 | `provider`, `experimental` | Request-shape overrides / experimental modes |
 

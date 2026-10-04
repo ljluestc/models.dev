@@ -16,8 +16,10 @@ import {
   knowledgeText,
   renderModalityIcon,
   renderModalities,
+  retentionText,
   sortDate,
   sortNumber,
+  trainingText,
   weightsText,
 } from "./shared.js";
 
@@ -700,7 +702,7 @@ function ProvidersPage(props: { providers: Array<[string, CatalogProvider]> }) {
       <TableSection
         title="Providers"
         count={props.providers.length}
-        columns={5}
+        columns={7}
         hideHeading
       >
         <table data-enhanced-table>
@@ -710,6 +712,8 @@ function ProvidersPage(props: { providers: Array<[string, CatalogProvider]> }) {
               <SortableTh type="number">Models</SortableTh>
               <SortableTh>Package</SortableTh>
               <SortableTh>API</SortableTh>
+              <SortableTh type="number">Retention</SortableTh>
+              <SortableTh>Trains on Data</SortableTh>
               <SortableTh>Docs</SortableTh>
             </tr>
           </thead>
@@ -733,6 +737,10 @@ function ProvidersPage(props: { providers: Array<[string, CatalogProvider]> }) {
                       "-"
                     )}
                   </td>
+                  <td data-sort={sortNumber(provider.data_policy?.retention_days)}>
+                    {retentionText(provider.data_policy)}
+                  </td>
+                  <td>{trainingText(provider.data_policy)}</td>
                   <td>
                     <a href={provider.doc} target="_blank" rel="noopener noreferrer">
                       Docs
@@ -741,7 +749,7 @@ function ProvidersPage(props: { providers: Array<[string, CatalogProvider]> }) {
                 </tr>
               );
             })}
-            <EmptyRow columns={5} />
+            <EmptyRow columns={7} />
           </tbody>
         </table>
       </TableSection>
@@ -828,7 +836,7 @@ function ModelPage(props: { model: ModelEntry }) {
         id="providers"
         title="Providers"
         count={model.providers.length}
-        columns={10}
+        columns={11}
       >
         <ProviderModelsTable models={model.providers} mode="model" />
       </TableSection>
@@ -854,6 +862,8 @@ function ProviderPage(props: {
           ["Models", props.models.length],
           ["Package", <span class="mono">{props.provider.npm}</span>],
           ["API", <span class="mono">{props.provider.api ?? "-"}</span>],
+          ["Retention", <DataPolicyValue policy={props.provider.data_policy} text={retentionText} />],
+          ["Trains on Data", <DataPolicyValue policy={props.provider.data_policy} text={trainingText} />],
           [
             "Docs",
             <a href={props.provider.doc} target="_blank" rel="noopener noreferrer">
@@ -862,7 +872,7 @@ function ProviderPage(props: {
           ],
         ]}
       />
-      <TableSection title="Models" count={props.models.length} columns={9}>
+      <TableSection title="Models" count={props.models.length} columns={10}>
         <ProviderModelsTable models={props.models} mode="provider" showLab={false} />
       </TableSection>
     </Fragment>
@@ -1074,7 +1084,7 @@ function ProviderModelsTable(props: {
   showLab?: boolean;
 }) {
   const showLab = props.showLab ?? props.mode === "model";
-  const columns = showLab ? 10 : 9;
+  const columns = showLab ? 11 : 10;
 
   return (
     <table data-enhanced-table>
@@ -1090,6 +1100,7 @@ function ProviderModelsTable(props: {
           <SortableTh type="number">Context</SortableTh>
           <SortableTh type="number">Output</SortableTh>
           <SortableTh type="number">Price</SortableTh>
+          <SortableTh type="number">Retention</SortableTh>
           <SortableTh>Reasoning</SortableTh>
           <SortableTh>Tool Call</SortableTh>
           <SortableTh>Structured</SortableTh>
@@ -1103,6 +1114,7 @@ function ProviderModelsTable(props: {
           const lab = canonical
             ? { id: canonical.labId, name: canonical.labName }
             : undefined;
+          const dataPolicy = entry.model.data_policy ?? entry.provider.data_policy;
 
           return (
             <tr
@@ -1148,6 +1160,9 @@ function ProviderModelsTable(props: {
               <td data-sort={sortNumber(entry.model.cost?.input)}>
                 {costSummary(entry.model.cost?.input, entry.model.cost?.output)}
               </td>
+              <td data-sort={sortNumber(dataPolicy?.retention_days)}>
+                <DataPolicyValue policy={dataPolicy} text={retentionText} />
+              </td>
               <td data-sort={booleanText(entry.model.reasoning)}>
                 {booleanText(entry.model.reasoning)}
               </td>
@@ -1166,6 +1181,20 @@ function ProviderModelsTable(props: {
         <EmptyRow columns={columns} />
       </tbody>
     </table>
+  );
+}
+
+function DataPolicyValue(props: {
+  policy?: CatalogProvider["data_policy"];
+  text: (policy?: CatalogProvider["data_policy"]) => string;
+}) {
+  const label = props.text(props.policy);
+  if (!props.policy || label === "-") return <span>{label}</span>;
+
+  return (
+    <a href={props.policy.source} target="_blank" rel="noopener noreferrer">
+      {label}
+    </a>
   );
 }
 

@@ -2,3 +2,10 @@ name = "Anthropic"
 env = ["ANTHROPIC_API_KEY"]
 npm = "@ai-sdk/anthropic"
 doc = "https://docs.anthropic.com/en/docs/about-claude/models"
+
+# Retention: "we automatically delete inputs and outputs on our backend within 30 days"
+# Training: https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training
+[data_policy]
+retention_days = 30
+trains_on_data = false
+source = "https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data"

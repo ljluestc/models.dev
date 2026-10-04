@@ -175,6 +175,22 @@ const ProviderModelLimit = LimitBase.extend({
 
 const UrlString = z.string().url("Must be a valid URL");
 
+export const DataPolicy = z
+  .object({
+    retention_days: z
+      .number()
+      .int("Retention days must be an integer")
+      .min(0, "Retention days cannot be negative")
+      .optional(),
+    trains_on_data: z.boolean().optional(),
+    source: UrlString,
+  })
+  .strict()
+  .refine(
+    (data) => data.retention_days !== undefined || data.trains_on_data !== undefined,
+    { message: "Data policy must set retention_days or trains_on_data" },
+  );
+
 export const ModelLink = z
   .object({
     label: z.string().min(1, "Link label cannot be empty").optional(),
@@ -275,6 +291,8 @@ const ModelBase = z.object({
   modalities: Modalities,
   open_weights: z.boolean(),
   limit: ProviderModelLimit,
+  /** Overrides the provider-level data_policy for this model. */
+  data_policy: DataPolicy.optional(),
   status: z.enum(["alpha", "beta", "deprecated"]).optional(),
   experimental: z
     .object({
@@ -396,6 +414,8 @@ export const Provider = z
         1,
         "Please provide a link to the provider documentation where models are listed",
       ),
+    /** Default data retention and training policy for this provider's API. */
+    data_policy: DataPolicy.optional(),
     models: z.record(Model),
   })
   .strict()

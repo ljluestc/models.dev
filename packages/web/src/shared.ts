@@ -75,6 +75,24 @@ export function costSummary(input?: number, output?: number) {
   return `${formatCost(input)} / ${formatCost(output)}`;
 }
 
+interface DataPolicyValues {
+  retention_days?: number;
+  trains_on_data?: boolean;
+}
+
+export function retentionText(policy?: DataPolicyValues) {
+  const days = policy?.retention_days;
+  if (days === undefined) return "-";
+  if (days === 0) return "None";
+  return `${days} ${days === 1 ? "day" : "days"}`;
+}
+
+export function trainingText(policy?: DataPolicyValues) {
+  const value = policy?.trains_on_data;
+  if (value === undefined) return "-";
+  return value ? "Yes" : "No";
+}
+
 export function capabilitySummary(capabilities: Array<[string, boolean | undefined]>) {
   const active = capabilities
     .filter(([, value]) => value === true)

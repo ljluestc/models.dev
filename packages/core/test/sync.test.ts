@@ -3,7 +3,7 @@ import { copyFile, mkdir, mkdtemp, readFile, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 
-import { formatToml, preserveReasoningOptions, syncProvider, type ExistingModel, type SyncProvider } from "../src/sync/index.js";
+import { formatToml, preserveDataPolicy, preserveReasoningOptions, syncProvider, type ExistingModel, type SyncProvider } from "../src/sync/index.js";
 import {
   anthropic,
   buildAnthropicModel,
@@ -5377,4 +5377,25 @@ test("rejects synced model paths that differ only in case", async () => {
   } finally {
     await rm(root, { recursive: true, force: true });
   }
+});
+
+test("formats a data policy table that round-trips", () => {
+  const dataPolicy = { retention_days: 0, trains_on_data: false, source: "https://example.com/privacy" };
+  const content = formatToml({
+    id: "example/model",
+    base_model: "example/model",
+    data_policy: dataPolicy,
+  });
+
+  expect(content).toContain("[data_policy]\nretention_days = 0\ntrains_on_data = false");
+  expect(Bun.TOML.parse(content)).toMatchObject({ data_policy: dataPolicy });
+});
+
+test("preserves hand-authored data policy across sync", () => {
+  const dataPolicy = { retention_days: 30, source: "https://example.com/privacy" };
+
+  expect(preserveDataPolicy({ base_model: "example/model" }, { data_policy: dataPolicy }))
+    .toEqual({ base_model: "example/model", data_policy: dataPolicy });
+  expect(preserveDataPolicy({ base_model: "example/model" }, undefined))
+    .toEqual({ base_model: "example/model" });
 });

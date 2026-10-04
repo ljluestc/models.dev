@@ -46,6 +46,27 @@ describe("model schema", () => {
     );
   });
 
+  test("accepts a model data policy override", () => {
+    const model = baseModel({
+      data_policy: { retention_days: 0, trains_on_data: false, source: "https://example.com/privacy" },
+    });
+
+    expect(AuthoredModel.safeParse(model).success).toBe(true);
+  });
+
+  test("rejects incomplete or invalid data policies", () => {
+    for (const data_policy of [
+      { source: "https://example.com/privacy" },
+      { retention_days: 30 },
+      { retention_days: -1, source: "https://example.com/privacy" },
+      { retention_days: 1.5, source: "https://example.com/privacy" },
+      { trains_on_data: false, source: "not a url" },
+      { trains_on_data: false, retains: true, source: "https://example.com/privacy" },
+    ]) {
+      expect(AuthoredModel.safeParse(baseModel({ data_policy: data_policy as never })).success).toBe(false);
+    }
+  });
+
   test("requires reasoning_options when reasoning is true", () => {
     const model = baseModel({ reasoning: true });
 
@@ -134,6 +155,13 @@ describe("provider schema", () => {
     const { api: _api, ...providerWithoutApi } = mergeGatewayProvider;
 
     expect(Provider.safeParse(providerWithoutApi).success).toBe(false);
+  });
+
+  test("accepts a provider data policy", () => {
+    expect(Provider.safeParse({
+      ...mergeGatewayProvider,
+      data_policy: { retention_days: 30, trains_on_data: false, source: "https://example.com/privacy" },
+    }).success).toBe(true);
   });
 });
 

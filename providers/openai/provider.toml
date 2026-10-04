@@ -2,3 +2,9 @@ name = "OpenAI"
 env = ["OPENAI_API_KEY"]
 npm = "@ai-sdk/openai"
 doc = "https://platform.openai.com/docs/models"
+
+# Abuse monitoring logs "retained for up to 30 days"; API data "is not used to train or improve OpenAI models" unless opted in
+[data_policy]
+retention_days = 30
+trains_on_data = false
+source = "https://developers.openai.com/api/docs/guides/your-data"

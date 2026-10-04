@@ -359,9 +359,10 @@ export async function syncProvider<SourceModel>(
     const withDescription = provider.preserveDescriptions === false
       ? withReasoningOptions
       : preserveDescription(withReasoningOptions, existing.get(relativePath)?.authored);
+    const withDataPolicy = preserveDataPolicy(withDescription, existing.get(relativePath)?.authored);
     const parsed = SyncedAuthoredModel.safeParse(stripUndefined({
       id: translated.id,
-      ...withDescription,
+      ...withDataPolicy,
     }));
     if (!parsed.success) {
       parsed.error.cause = { provider: provider.id, path: relativePath };
@@ -565,6 +566,12 @@ export function preserveDescription(model: SyncedModel, existing: ExistingModel 
   if (model.description !== undefined) return model;
   if (existing?.description === undefined) return model;
   return { ...model, description: existing.description } as SyncedModel;
+}
+
+export function preserveDataPolicy(model: SyncedModel, existing: ExistingModel | undefined): SyncedModel {
+  if (model.data_policy !== undefined) return model;
+  if (existing?.data_policy === undefined) return model;
+  return { ...model, data_policy: existing.data_policy } as SyncedModel;
 }
 
 export function preserveReasoningOptions(
@@ -1090,6 +1097,17 @@ export function formatToml(model: z.infer<typeof SyncedAuthoredModel>) {
     if (model.limit.context !== undefined) lines.push(`context = ${formatInteger(model.limit.context)}`);
     if (model.limit.input !== undefined) lines.push(`input = ${formatInteger(model.limit.input)}`);
     if (model.limit.output !== undefined) lines.push(`output = ${formatInteger(model.limit.output)}`);
+  }
+
+  if (model.data_policy !== undefined) {
+    lines.push("", "[data_policy]");
+    if (model.data_policy.retention_days !== undefined) {
+      lines.push(`retention_days = ${formatInteger(model.data_policy.retention_days)}`);
+    }
+    if (model.data_policy.trains_on_data !== undefined) {
+      lines.push(`trains_on_data = ${model.data_policy.trains_on_data}`);
+    }
+    if (model.data_policy.source !== undefined) lines.push(`source = ${quote(model.data_policy.source)}`);
   }
 
   if (model.modalities !== undefined) {

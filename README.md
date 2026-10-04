@@ -235,7 +235,7 @@ Rules:
 - You may override any top-level model field when the provider actually differs.
 - If you override a nested table like `[cost]`, `[limit]`, or `[modalities]`, include the full values needed for that table (arrays/primitives replace; plain objects deep-merge).
 - `base_model_omit` is optional and removes inherited model metadata fields after local overrides are merged. Use dot-path strings, for example `base_model_omit = ["limit.input"]`.
-- Provider-specific fields (`cost`, `reasoning_options`, `interleaved`, `status`, `provider`, `experimental`) belong on the provider model when needed.
+- Provider-specific fields (`cost`, `reasoning_options`, `interleaved`, `data_policy`, `status`, `provider`, `experimental`) belong on the provider model when needed.
 - `id` still comes from the filename; do not add it to the TOML.
 
 **Reasoning options (short):** classify first-party lab vs multi-model relay (not by npm). Copy the underlying model’s controls from the lab entry and same-surface peers — often `low`/`medium`/`high` on GPT-style relays, but DeepSeek V4 is `toggle`+`high`/`max`, etc. Do not use `[]` from uncertainty on relays. Full policy: `AGENTS.md`.
@@ -278,6 +278,10 @@ Models must conform to the following schema, as defined in `packages/core/src/sc
 - `npm`: String - AI SDK Package name
 - `env`: String[] - Environment variable keys used for auth
 - `doc`: String - Link to the provider's documentation
+- `data_policy` _(optional)_: Table — The provider's own published defaults for its API:
+  - `retention_days` _(optional)_: Integer — Days prompts and completions are retained; `0` means not retained
+  - `trains_on_data` _(optional)_: Boolean — Whether API data is used for training by default
+  - `source`: String — URL of the policy the values come from (required)
 - `api` _(optional)_: String - OpenAI-compatible API endpoint. Required only when using `@ai-sdk/openai-compatible` as the npm package
 
 **Model Schema:**
@@ -307,6 +311,7 @@ Models must conform to the following schema, as defined in `packages/core/src/sc
 - `limit.output`: Number — Maximum output tokens
 - `modalities.input`: Array of strings — Supported input modalities (e.g., ["text", "image", "audio", "video", "pdf"])
 - `modalities.output`: Array of strings — Supported output modalities (e.g., ["text"])
+- `data_policy` _(optional)_: Table — Overrides the provider's `data_policy` for this model (e.g. an aggregator routing to an upstream with a different policy). Same keys as the provider-level table
 - `status` _(optional)_: String — Supported status:
   - `alpha` - Indicate the model is in alpha testing
   - `beta` - Indicate the model is in beta testing
